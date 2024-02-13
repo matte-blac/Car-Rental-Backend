@@ -9,9 +9,9 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
-    phone_number = db.Column(db.Integer(12), nullable=False)
+    phone_number = db.Column(db.Integer, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
-    password = db.column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False)
 
     # relationship to AvailableCars
     hired_cars = db.relationship('AvailableCars', backref='user', lazy=True)
