@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.orm import validates
 
 db = SQLAlchemy()
 
@@ -15,6 +16,11 @@ class User(db.Model, SerializerMixin):
 
     # relationship to AvailableCars
     hired_cars = db.relationship('AvailableCars', backref='user', lazy=True)
+
+    @validates('email')
+    def validates_email(self, key, email):
+        assert '@' and '.com' in email, 'Invalid Email'
+        return email
 
 class AvailableCars(db.Model, SerializerMixin):
     __tablename__ = 'availablecars'
