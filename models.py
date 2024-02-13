@@ -14,15 +14,15 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
 
-    # relationship to AvailableCars
-    hired_cars = db.relationship('AvailableCars', backref='user', lazy=True)
+    # relationship to HiredCars
+    hired_cars = db.relationship('HiredCar', backref='user', lazy=True)
 
     @validates('email')
     def validates_email(self, key, email):
         assert '@' and '.com' in email, 'Invalid Email'
         return email
 
-class AvailableCars(db.Model, SerializerMixin):
+class AvailableCar(db.Model, SerializerMixin):
     __tablename__ = 'availablecars'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -30,5 +30,18 @@ class AvailableCars(db.Model, SerializerMixin):
     price = db.Column(db.Float, nullable=False)
     car_name = db.Column(db.String, nullable=False)
 
+    # relationship to HiredCars
+    hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
+
+class HiredCar(db.Model, SerializerMixin):
+    __tablename__ = 'hiredcars'
+
+    id = db.Column(db.Integer, primary_key=True)
+    hired_date = db.Column(db.DateTime, nullable=False)
+    return_date = db.Column(db.DateTime, nullable=False)
+
     # Foreign Key to Users
-    users_id = db.Column(db.Integer, Foreign_Key=('users.id'), nullable=True)
+    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    # Foreign Key to AvailableCars
+    availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id'), nullable=False)
