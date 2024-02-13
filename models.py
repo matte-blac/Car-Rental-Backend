@@ -13,15 +13,16 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.column(db.String, nullable=False)
 
-    # relationship to HiredCars
-    hired_cars = db.relationship('HiredCars', backref='user', lazy=True)
+    # relationship to AvailableCars
+    hired_cars = db.relationship('AvailableCars', backref='user', lazy=True)
 
-class HiredCars(db.Model, SerializerMixin):
-    __tablename__ = 'hiredcars'
+class AvailableCars(db.Model, SerializerMixin):
+    __tablename__ = 'availablecars'
 
     id = db.Column(db.Integer, primary_key=True)
     brand = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     car_name = db.Column(db.String, nullable=False)
 
+    # Foreign Key to Users
     users_id = db.Column(db.Integer, Foreign_Key=('users.id'), nullable=True)
