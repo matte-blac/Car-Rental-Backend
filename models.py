@@ -33,6 +33,9 @@ class AvailableCar(db.Model, SerializerMixin):
     # relationship to HiredCars
     hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
 
+    # foreign key to Categories
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+
 class Category(db.Model, SerializerMixin):
     __tablename__ = 'categories'
 
