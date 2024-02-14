@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
+from datetime import time
 
 db = SQLAlchemy()
 
@@ -59,3 +60,13 @@ class HiredCar(db.Model, SerializerMixin):
 
     # Foreign Key to AvailableCars
     availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id'), nullable=False)
+
+    # validates acceptable times and days for hiring and returning
+    @validates('hired_date', 'return_date')
+    def validate_date(self, key, date):
+        assert date.weekday() < 6, "Apologies, Sunday is closed"
+        if date.weekday() < 5: # Monday to Friday
+            assert time(8, 0) <= date.time() <= time(17, 0), "Opening Hours is from 8am to 5pm"
+        else: # Saturday
+            assert time(9, 0) <= date.time() <= time(14, 0), "Opening Hours is from 9am to 2pm"
+        return date
