@@ -51,6 +51,8 @@ class HiredCar(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     hired_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime, nullable=False)
+    pickup_location = db.Column(db.String, nullable=False)
+    destination = db.Column(db.String, nullable=False)
 
     # Foreign Key to Users
     users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
