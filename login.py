@@ -1,30 +1,65 @@
-from flask_restful import Resource
-from flask_jwt_extended import create_access_token
 from flask import request
-from models import User
+from flask_restful import Resource
+from models import db, User, bcrypt
 
-# Define the LoginResource class to handle user authentication
-class LoginResource(Resource):
-    # Define method to authenticate users
+# Define a resource for user registration
+class UserRegistrationResource(Resource):
     def post(self):
         try:
-            # Get the username and password from the request JSON data
-            username = request.json.get('username')
-            password = request.json.get('password')
+            # Extract username and password from the request JSON data
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
 
-            # Query the database to find the user with the provided credentials
-            user = User.query.filter_by(username=username, password=password).first()
+            # Check if both username and password are provided
+            if not username or not password:
+                return {"error": "Username and password are required."}, 400
 
-            # Check if user exists and credentials are correct
-            if user:
-                # Generate JWT access token for the user
-                access_token = create_access_token(identity=username)
+            # Check if the username is already taken
+            existing_user = User.query.filter_by(username=username).first()
+            if existing_user:
+                return {"error": "Username is already taken."}, 400
 
-                # Return the access token as JSON response with HTTP status code 200 (OK)
-                return {'access_token': access_token}, 200
-            else:
-                # Return error message for invalid username or password with HTTP status code 401 (Unauthorized)
-                return {'error': 'Invalid username or password'}, 401
+            # Hash the password
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+            # Create a new user instance
+            new_user = User(username=username, password=hashed_password)
+
+            # Add the new user to the database session and commit the transaction
+            db.session.add(new_user)
+            db.session.commit()
+
+            # Return a success message for user registration
+            return {"message": "User registered successfully."}, 201
         except Exception as e:
-            # Return error message for internal server error with HTTP status code 500 (Internal Server Error)
-            return {'error': str(e)}, 500
+            # Return an error message for any unexpected errors
+            return {"error": str(e)}, 500
+
+# Define a resource for user login
+class LoginResource(Resource):
+    def post(self):
+        try:
+            # Extract username and password from the request JSON data
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+
+            # Check if both username and password are provided
+            if not username or not password:
+                return {"error": "Username and password are required."}, 400
+
+            # Retrieve the user with the provided username from the database
+            user = User.query.filter_by(username=username).first()
+
+            # Check if the user exists and the password is correct
+            if user and bcrypt.check_password_hash(user.password, password):
+                # Return a success message along with the user's details
+                return {"message": "Login successful.", "user": {"id": user.id, "username": user.username}}, 200
+            else:
+                # Return an error message for invalid credentials
+                return {"error": "Invalid username or password."}, 401
+        except Exception as e:
+            # Return an error message for any unexpected errors
+            return {"error": str(e)}, 500
+

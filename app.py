@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Set the secret key for JWT token encoding and decoding
+# Set the secret key for JWT token
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 
 # Initialize SQLAlchemy with the Flask app
