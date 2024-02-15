@@ -1,22 +1,21 @@
-from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from models import db, User, bcrypt
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from models import User
 
-
-# Define a resource class for handling user-related operations
-class Users(Resource):
-    # Define a method to handle HTTP GET requests
+# Define the UsersResource class to handle user-related operations
+class UsersResource(Resource):
+    # Define method to retrieve users
+    @jwt_required()  # Require JWT authentication to access this endpoint
     def get(self):
-        try:
-            # Retrieve all users from the database and convert them to dictionaries
-            users = [user.to_dict() for user in User.query.all()]
+        # Get the identity of the current user from the JWT token
+        current_user = get_jwt_identity()
 
-            # Return a JSON response with the list of user dictionaries and HTTP status code 200 (OK)
-            return jsonify(users), 200
-        except Exception as e:
-            # If an error occurs, create an error message dictionary
-            error_message = {'error': str(e)}
-
-            # Return a JSON response with the error message and HTTP status code 500 (Internal Server Error)
-            return jsonify(error_message), 500
+        # Check if the current user is an admin
+        if current_user == 'admin':
+            # Retrieve all users from the database
+            users = User.query.all()
+            # Convert users to dictionary format
+            users_data = [{'id': user.id, 'username': user.username, 'is_admin': user.is_admin} for user in users]
+            return {'users': users_data}, 200
+        else:
+            return {'error': 'Access denied. Admin privilege required.'}, 403

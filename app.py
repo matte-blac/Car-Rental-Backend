@@ -1,37 +1,31 @@
-from flask import Flask, jsonify, make_response
-from models import db, User
-from flask_migrate import Migrate
-from flask_cors import CORS
-from flask_restful import Api, Resource
-from users import Users
+from flask import Flask
+from flask_restful import Api
+from models import db
+from users import UsersResource
+from login import LoginResource
 
-
-# Initialize Flask application
+# Create Flask application instance
 app = Flask(__name__)
 
-# Configure SQLAlchemy to use SQLite database 
+# Configure SQLAlchemy to use SQLite database located at 'app.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Set JSON compact mode to False to make the JSON response more readable
-app.json_compact = False
+# Set the secret key for JWT token encoding and decoding
+app.config['JWT_SECRET_KEY'] = 'super-secret'
 
 # Initialize SQLAlchemy with the Flask app
 db.init_app(app)
 
-# Initialize Flask-Migrate for handling database migrations
-migrate = Migrate(app, db)
-
-# Enable Cross-Origin Resource Sharing (CORS) for allowing requests from any origin
-CORS(app)
-
 # Initialize Flask-RESTful API
 api = Api(app)
 
+# Add Users resource to the Flask-RESTful API with the endpoint '/users'
+api.add_resource(UsersResource, '/users')
 
-# Add the Users resource to the Flask-RESTful API with the endpoint '/users'
-api.add_resource(Users, '/users')
+# Add Login resource to the Flask-RESTful API with the endpoint '/login'
+api.add_resource(LoginResource, '/login')
 
+# Start the Flask application if this script is executed directly
 if __name__ == '__main__':
-    # Run the Flask application on port 5555 in debug mode with reloader enabled
-    app.run(port=5555, debug=True, use_reloader=True)
+    app.run(port=5555, debug=True)
