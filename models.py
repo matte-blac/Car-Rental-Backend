@@ -31,6 +31,7 @@ class AvailableCar(db.Model, SerializerMixin):
     brand = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     car_name = db.Column(db.String, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
     # relationship to HiredCars
     hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
