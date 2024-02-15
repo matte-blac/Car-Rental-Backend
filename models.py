@@ -11,6 +11,7 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
+    role = db.Column(db.String(20), default='user', nullable=False)
     phone_number = db.Column(db.Integer, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
@@ -30,6 +31,7 @@ class AvailableCar(db.Model, SerializerMixin):
     brand = db.Column(db.String, nullable=False)
     price = db.Column(db.Float, nullable=False)
     car_name = db.Column(db.String, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
     # relationship to HiredCars
     hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
@@ -69,4 +71,4 @@ class HiredCar(db.Model, SerializerMixin):
             assert time(8, 0) <= date.time() <= time(17, 0), "Opening Hours is from 8am to 5pm"
         else: # Saturday
             assert time(9, 0) <= date.time() <= time(14, 0), "Opening Hours is from 9am to 2pm"
-        return date
+        return date 
