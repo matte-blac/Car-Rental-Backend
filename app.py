@@ -3,6 +3,7 @@ from flask_restful import Api
 from models import db
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
+from flask_migrate import Migrate
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -19,7 +20,7 @@ db.init_app(app)
 
 # Initialize Flask-RESTful API
 api = Api(app)
-
+migrate = Migrate(app, db)
 # Add Users resource to the Flask-RESTful API with the endpoint '/users'
 api.add_resource(UsersResource, '/users')
 

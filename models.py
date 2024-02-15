@@ -3,6 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import time
 
+
 db = SQLAlchemy()
 
 class User(db.Model, SerializerMixin):

@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from models import db, User, bcrypt
+from models import db, User #bcrypt
 
 # Define a resource for user registration
 class UserRegistrationResource(Resource):
