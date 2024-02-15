@@ -3,6 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import time
 from flask_bcrypt import Bcrypt
+import re
 
 db = SQLAlchemy()
 bcrypt = Bcrypt
@@ -35,12 +36,26 @@ class AvailableCar(db.Model, SerializerMixin):
     car_name = db.Column(db.String, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     image_url = db.Column(db.String(255), nullable=False)
+    number_plate = db.Column(db.String, unique=True, nullable=False)
 
     # relationship to HiredCars
     hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
 
     # foreign key to Categories
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+
+    @validates('number_plate')
+    def validate_number_plate(self, key, number_plate):
+        # the number plate should start with 'K
+        assert number_plate[0] == 'K', "Number plate must start with 'K'"
+        # the second and third characters should be letters
+        assert number_plate[1:3].isalpha(), "The second and third characters must be letters"
+        # there must be a space after the first 3 characters
+        assert number_plate[3] == ' ', "There must be a space after the first three letters"
+        # the first 3 characters after the space must be digits
+        assert number_plate[4:7].isdigit(), 'The first 3 characters after the space must be numbers'
+        # the last character must be a letter
+        assert number_plate[7].isalpha(), 'The last character must be a letter'
 
 class Category(db.Model, SerializerMixin):
     __tablename__ = 'categories'
@@ -61,10 +76,10 @@ class HiredCar(db.Model, SerializerMixin):
     destination = db.Column(db.String, nullable=False)
 
     # Foreign Key to Users
-    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    users_id = db.Column(db.Integer, db.ForeignKey('users.id', name='fk_users') , nullable=True)
 
     # Foreign Key to AvailableCars
-    availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id'), nullable=False)
+    availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id', name='fk_availablecars'), nullable=False)
 
     # validates acceptable times and days for hiring and returning
     @validates('hired_date', 'return_date')
