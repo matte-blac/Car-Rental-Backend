@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from models import db
 from users import UsersResource
-from login import LoginResource
+from login import LoginResource, UserRegistrationResource
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -25,6 +25,9 @@ api.add_resource(UsersResource, '/users')
 
 # Add Login resource to the Flask-RESTful API with the endpoint '/login'
 api.add_resource(LoginResource, '/login')
+
+# Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
+api.add_resource(UserRegistrationResource, '/register')
 
 # Start the Flask application if this script is executed directly
 if __name__ == '__main__':
