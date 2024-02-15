@@ -56,10 +56,10 @@ class HiredCar(db.Model, SerializerMixin):
     destination = db.Column(db.String, nullable=False)
 
     # Foreign Key to Users
-    users_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    users_id = db.Column(db.Integer, db.ForeignKey('users.id', name='fk_users') , nullable=True)
 
     # Foreign Key to AvailableCars
-    availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id'), nullable=False)
+    availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id', name='fk_availablecars'), nullable=False)
 
     # validates acceptable times and days for hiring and returning
     @validates('hired_date', 'return_date')
