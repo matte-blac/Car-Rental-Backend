@@ -1,6 +1,6 @@
 from flask import request
 from flask_restful import Resource
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, create_refresh_token
 from models import db, User, bcrypt 
 
 
@@ -78,11 +78,15 @@ class LoginResource(Resource):
             if user and bcrypt.check_password_hash(user.password, password):
                 # Generate JWT token for the user
                 access_token = create_access_token(identity=user.id)
+                
+                # Generate JWT refresh token
+                refresh_token = create_refresh_token(identity=user.id)
                 # Return a success message along with the user's details and token
                 return {
                     "message": "Login successful.",
                     "user": {"id": user.id, "email": user.email},
-                    "access_token": access_token
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
                 }, 200
             else:
                 # Return an error message for invalid credentials
