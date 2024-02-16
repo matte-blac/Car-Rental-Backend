@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from models import db
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
-
+from flask_jwt_extended import JWTManager
 from admin import AvailableCarResource,AdminAvailableCarResource
 
 # Create Flask application instance
@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+jwt = JWTManager(app)
 # Set the secret key for JWT token
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 
