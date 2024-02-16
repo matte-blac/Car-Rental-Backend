@@ -35,6 +35,7 @@ api.add_resource(LoginResource, '/login')
 # Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
 api.add_resource(UserRegistrationResource, '/register')
 
+#get all available cars
 @app.route('/availablecars')
 def get_availablecars():
     availablecars = AvailableCar.query.all()
@@ -51,6 +52,18 @@ def get_availablecars():
         }
         cars_list.append(car_dict)
     return jsonify (cars_list)
+
+#get available cars by id
+@app.route('/availablecars/<int:availablecars_id>', methods=['GET'])
+def get_availablecars_by_id(availablecars_id):
+    car = AvailableCar.query.get(availablecars_id)
+    if car:
+        return jsonify({
+            'id': car.id,
+            'brand': car.brand
+        }), 200
+    else:
+        return jsonify ({'error': 'Car not found'}, 400)
 
 
 # Start the Flask application if this script is executed directly
