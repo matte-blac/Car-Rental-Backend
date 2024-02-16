@@ -65,6 +65,21 @@ def get_availablecars_by_id(availablecars_id):
     else:
         return jsonify ({'error': 'Car not found'}, 400)
 
+#update available cars
+@app.route('/availablecars/<int:availablecars_id>', methods=['PUT'])
+def update_availablecar(availablecars_id):
+    data = request.json
+    car = AvailableCar.query.get(availablecars_id)
+    if car:
+        car.brand = data.get('brand', car.brand)
+        car.price = data.get('price', car.price)
+        car.car_name = data.get('car_name', car.car_name)
+        car.quantity = data.get('quantity', car.quantity)
+        car.image_url = data.get('image_url', car.image_url)
+        car.number_plate = data.get('number_plate', car.number_plate)
+        db.session.commit()
+        return jsonify({'message': 'Available car updated successfully'})
+
 
 # Start the Flask application if this script is executed directly
 if __name__ == '__main__':
