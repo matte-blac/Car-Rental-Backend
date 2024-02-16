@@ -19,8 +19,8 @@ app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # Token expiration time (1 hour)
 
 # Initialize SQLAlchemy with the Flask app
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+db.init_app(app)
 
 # Initialize Flask-JWT-Extended
 jwt = JWTManager(app)
@@ -35,16 +35,23 @@ api.add_resource(LoginResource, '/login')
 # Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
 api.add_resource(UserRegistrationResource, '/register')
 
-# Sample protected route requiring JWT authentication
-@app.route('/protected')
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+@app.route('/availablecars')
+def get_availablecars():
+    availablecars = AvailableCar.query.all()
+    cars_list = []
+    for car in availablecars:
+        car_dict = {
+            'id': car.id,
+            'brand': car.brand,
+            'price': car.price,
+            'car_name': car.car_name,
+            "quantity": car.quantity,
+            'image_url': car.image_url,
+            'number_plate': car.number_plate
+        }
+        cars_list.append(car_dict)
+    return jsonify (cars_list)
 
-@app.route('/')
-def home():
-    return 'home'
 
 # Start the Flask application if this script is executed directly
 if __name__ == '__main__':
