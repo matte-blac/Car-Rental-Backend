@@ -32,6 +32,9 @@ class UserRegistrationResource(Resource):
             # Check password variable whether None or not being a string
             if password is None or not isinstance(password, str):
                 return {'error': 'Password is required and must be a string.'}, 400
+            print("Data:", data)
+            print("Password:", password)
+
 
             # Create a new user instance
             new_user = User(
