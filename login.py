@@ -29,6 +29,10 @@ class UserRegistrationResource(Resource):
             # Hash the password
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
+            # Check password variable whether None or not being a string
+            if password is None or not isinstance(password, str):
+                return {'error': 'Password is required and must be a string.'}, 400
+
             # Create a new user instance
             new_user = User(
                 email=email,
