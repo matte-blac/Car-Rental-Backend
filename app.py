@@ -79,6 +79,108 @@ def update_availablecar(availablecars_id):
         car.number_plate = data.get('number_plate', car.number_plate)
         db.session.commit()
         return jsonify({'message': 'Available car updated successfully'})
+    else:
+        return jsonify({"message": 'Failed to update'})
+
+#delete available car by id
+@app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
+def delete_availablecar(availablecars_id):
+    car = Available.query.get(availablecars_id)
+    if car:
+        db.session.delete(car)
+        db.session.commit()
+        return jsonify({'message': 'Available car has been deleted'})
+    else:
+        return jsonify ({'message': 'Error deleting car'})
+
+#add new available car
+@app.route('/availablecars', methods=['POST'])
+def add_availablecar():
+    data = request.json
+    new_car = Available(
+    brand=data['brand'],
+    price=dat['price'],
+    car_name=data['car_name'],
+    quantity=dat['quantity'],
+    image_url=data['image_url'],
+    number_plate=dat['number_plate']
+    )
+    db.session.add(new_car)
+    db.session.commit()
+    return jsonify ({'message': 'New car addded succssfully'})
+
+#get all categories
+@app.route('/categories')
+def get_categories():
+    categories = Category.query.all()
+    categories_list = []
+    for category in categories:
+        category_dict = {
+            'id': category.id,
+            'category_name': category.category_name
+        }
+        categories_list.append(category_dict)
+    return jsonify (categories_list)
+
+#get available cars by id
+@app.route('/availablecars/<int:availablecars_id>', methods=['GET'])
+def get_availablecars_by_id(availablecars_id):
+    car = AvailableCar.query.get(availablecars_id)
+    if car:
+        return jsonify({
+            'id': car.id,
+            'brand': car.brand
+        }), 200
+    else:
+        return jsonify ({'error': 'Car not found'}, 400)
+
+#update available cars
+@app.route('/availablecars/<int:availablecars_id>', methods=['PUT'])
+def update_availablecar(availablecars_id):
+    data = request.json
+    car = AvailableCar.query.get(availablecars_id)
+    if car:
+        car.brand = data.get('brand', car.brand)
+        car.price = data.get('price', car.price)
+        car.car_name = data.get('car_name', car.car_name)
+        car.quantity = data.get('quantity', car.quantity)
+        car.image_url = data.get('image_url', car.image_url)
+        car.number_plate = data.get('number_plate', car.number_plate)
+        db.session.commit()
+        return jsonify({'message': 'Available car updated successfully'})
+    else:
+        return jsonify({"message": 'Failed to update'})
+
+#delete available car by id
+@app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
+def delete_availablecar(availablecars_id):
+    car = Available.query.get(availablecars_id)
+    if car:
+        db.session.delete(car)
+        db.session.commit()
+        return jsonify({'message': 'Available car has been deleted'})
+    else:
+        return jsonify ({'message': 'Error deleting car'})
+
+#add new available car
+@app.route('/availablecars', methods=['POST'])
+def add_availablecar():
+    data = request.json
+    new_car = Available(
+    brand=data['brand'],
+    price=dat['price'],
+    car_name=data['car_name'],
+    quantity=dat['quantity'],
+    image_url=data['image_url'],
+    number_plate=dat['number_plate']
+    )
+    db.session.add(new_car)
+    db.session.commit()
+    return jsonify ({'message': 'New car addded succssfully'})
+
+
+
+
 
 
 # Start the Flask application if this script is executed directly
