@@ -1,9 +1,12 @@
 from flask import Flask
 from flask_restful import Api
+from flask_migrate import Migrate
 from models import db
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
 from flask_migrate import Migrate
+
+from admin import AvailableCarResource,AdminAvailableCarResource
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -21,6 +24,7 @@ db.init_app(app)
 # Initialize Flask-RESTful API
 api = Api(app)
 migrate = Migrate(app, db)
+
 # Add Users resource to the Flask-RESTful API with the endpoint '/users'
 api.add_resource(UsersResource, '/users')
 
@@ -29,6 +33,9 @@ api.add_resource(LoginResource, '/login')
 
 # Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
 api.add_resource(UserRegistrationResource, '/register')
+
+api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
+api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>') 
 
 # Start the Flask application if this script is executed directly
 if __name__ == '__main__':
