@@ -58,7 +58,7 @@ class AvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
 class AdminAvailableCarResource(Resource):
     @jwt_required()
@@ -87,7 +87,7 @@ class AdminAvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
     @jwt_required()
     def patch(self, availablecar_id):
@@ -123,7 +123,7 @@ class AdminAvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
     @jwt_required()
     def delete(self, availablecar_id):
