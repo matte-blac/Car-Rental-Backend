@@ -3,11 +3,12 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import time
 from flask_bcrypt import Bcrypt
-import re
+
+import os
 
 
 db = SQLAlchemy()
-bcrypt = Bcrypt
+bcrypt = Bcrypt()
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
@@ -45,18 +46,6 @@ class AvailableCar(db.Model, SerializerMixin):
     # foreign key to Categories
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
 
-    @validates('number_plate')
-    def validate_number_plate(self, key, number_plate):
-        # the number plate should start with 'K
-        assert number_plate[0] == 'K', "Number plate must start with 'K'"
-        # the second and third characters should be letters
-        assert number_plate[1:3].isalpha(), "The second and third characters must be letters"
-        # there must be a space after the first 3 characters
-        assert number_plate[3] == ' ', "There must be a space after the first three letters"
-        # the first 3 characters after the space must be digits
-        assert number_plate[4:7].isdigit(), 'The first 3 characters after the space must be numbers'
-        # the last character must be a letter
-        assert number_plate[7].isalpha(), 'The last character must be a letter'
 
 class Category(db.Model, SerializerMixin):
     __tablename__ = 'categories'
@@ -81,13 +70,3 @@ class HiredCar(db.Model, SerializerMixin):
 
     # Foreign Key to AvailableCars
     availablecars_id = db.Column(db.Integer, db.ForeignKey('availablecars.id', name='fk_availablecars'), nullable=False)
-
-    # validates acceptable times and days for hiring and returning
-    @validates('hired_date', 'return_date')
-    def validate_date(self, key, date):
-        assert date.weekday() < 6, "Apologies, Sunday is closed"
-        if date.weekday() < 5: # Monday to Friday
-            assert time(8, 0) <= date.time() <= time(17, 0), "Opening Hours is from 8am to 5pm"
-        else: # Saturday
-            assert time(9, 0) <= date.time() <= time(14, 0), "Opening Hours is from 9am to 2pm"
-        return date 
