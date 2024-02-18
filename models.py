@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 
 import os
 
+
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 

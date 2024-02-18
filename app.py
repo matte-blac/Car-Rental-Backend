@@ -5,9 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
-from flask_jwt_extended import JWTManager
 from admin import AvailableCarResource,AdminAvailableCarResource
-from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from hire import AdminActionResource, HireStatusResource, HireResource
 
@@ -89,7 +87,7 @@ def update_availablecar(availablecars_id):
         db.session.commit()
         return jsonify({'message': 'Available car updated successfully'})
     else:
-        return jsonify({"message": 'Failed to update'})
+        return jsonify({"message": 'Car not found. Failed to update.'})
 
 #delete available car by id
 @app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
@@ -108,9 +106,9 @@ def add_availablecar():
     data = request.json
     new_car = AvailableCar(
     brand=data['brand'],
-    price=dat['price'],
+    price=data['price'],
     car_name=data['car_name'],
-    quantity=dat['quantity'],
+    quantity=data['quantity'],
     image_url=data['image_url'],
     number_plate=data['number_plate']
     )
@@ -164,7 +162,7 @@ def delete_category(categories_id):
         db.session.commit()
         return jsonify({'message': 'Category has been deleted'})
     else:
-        return jsonify ({'message': 'Error deleting car'})
+        return jsonify ({'message': 'Error deleting category'})
 
 #add new category
 @app.route('/categories', methods=['POST'])
