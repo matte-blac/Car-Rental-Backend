@@ -3,10 +3,11 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 from datetime import time
 from flask_bcrypt import Bcrypt
-import re
+
+import os
 
 db = SQLAlchemy()
-bcrypt = Bcrypt
+bcrypt = Bcrypt()
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
