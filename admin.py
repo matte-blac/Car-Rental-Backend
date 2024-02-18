@@ -8,8 +8,8 @@ class AvailableCarResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('car_name', type=str, required=True, help='Car name cannot be blank')
     parser.add_argument('quantity', type=int, required=True, help='Quantity cannot be blank')
-    parser.add_argument('brand', type=int,required=True, help='brand cannot be blank')
-    parser.add_argument('image_url', type=int,required=True, help='Image cannot be blank')
+    parser.add_argument('brand', type=str,required=True, help='brand cannot be blank')
+    parser.add_argument('image_url', type=str,required=True, help='Image cannot be blank')
     parser.add_argument('price', type=float, required=True, help='Price cannot be blank')
     parser.add_argument('number_plate', type=str, required=True, help='Number plate cannot be blank')
     @jwt_required(True)
@@ -41,7 +41,7 @@ class AvailableCarResource(Resource):
 
             data = request.get_json()
             new_availablecar = AvailableCar(
-                car_name=data['name'],
+                car_name=data['car_name'],
                 quantity=data['quantity'],
                 brand=data['brand'],
                 image_url=data['image_url'],
@@ -137,7 +137,7 @@ class AdminAvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
     @jwt_required()
     def delete(self, availablecar_id):
