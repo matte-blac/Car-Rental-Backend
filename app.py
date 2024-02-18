@@ -41,10 +41,7 @@ api.add_resource(LoginResource, '/login')
 api.add_resource(UserRegistrationResource, '/register')
 
 api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
-api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>') 
-
-api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
-api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>') 
+api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>')
 
 #get all available cars
 @app.route('/availablecars')
