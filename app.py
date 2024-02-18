@@ -9,6 +9,7 @@ from flask_jwt_extended import JWTManager
 from admin import AvailableCarResource,AdminAvailableCarResource
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from hire import AdminActionResource, HireStatusResource, HireResource
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -175,6 +176,7 @@ def add_category():
     db.session.add(new_category)
     db.session.commit()
     return jsonify ({'message': 'Category addded succssfully'})
+
 
 # Start the Flask application if this script is executed directly
 if __name__ == '__main__':
