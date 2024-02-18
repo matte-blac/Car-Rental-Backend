@@ -6,7 +6,6 @@ from models import db, AvailableCar, HiredCar, User, Category
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
 from flask_jwt_extended import JWTManagerfrom 
-flask_migrate import Migrate
 from admin import AvailableCarResource,AdminAvailableCarResource
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
