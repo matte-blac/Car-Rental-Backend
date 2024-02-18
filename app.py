@@ -8,6 +8,7 @@ from login import LoginResource, UserRegistrationResource
 from admin import AvailableCarResource,AdminAvailableCarResource
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from hire import AdminActionResource, HireStatusResource, HireResource
+from hire import AdminActionResource, HireResource, HireStatusResource
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -41,6 +42,10 @@ api.add_resource(UserRegistrationResource, '/register')
 
 api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
 api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>')
+
+api.add_resource(HireResource, '/hire')
+api.add_resource(HireStatusResource, '/hire_status/<int:user_id>')
+api.add_resource(AdminActionResource, '/admin/action')
 
 #get all available cars
 @app.route('/availablecars')
