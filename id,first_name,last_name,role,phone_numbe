@@ -1,1 +1,2 @@
-
+id,first_name,last_name,role,phone_number,email,password
+1,John,Doe,admin,1234567890,john.doe@example.com,$2b$12$h3z7Dqdy0SpHHVpO2BytJe8JdtKdCRWWH9MJiOBXCDeU7Mph7nreC
