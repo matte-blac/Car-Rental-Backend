@@ -77,10 +77,10 @@ class LoginResource(Resource):
             # Check if the user exists and the password is correct
             if user and bcrypt.check_password_hash(user.password, password):
                 # Generate JWT token for the user
-                access_token = create_access_token(identity=user.id)
+                access_token = create_access_token(identity=user.email)
                 
                 # Generate JWT refresh token
-                refresh_token = create_refresh_token(identity=user.id)
+                refresh_token = create_refresh_token(identity=user.email)
                 # Return a success message along with the user's details and token
                 return {
                     "message": "Login successful.",

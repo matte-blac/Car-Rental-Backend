@@ -38,6 +38,8 @@ class AvailableCarResource(Resource):
             current_user = User.query.filter_by(email=get_jwt_identity()).first()
             if not current_user:
                 return {"error": "User not authenticated"}, 401
+            if current_user.role != 'admin':
+                return {"error": "User not Admin"}, 403
 
             data = request.get_json()
             new_availablecar = AvailableCar(

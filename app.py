@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 jwt = JWTManager(app)
 # Set the secret key for JWT token
 app.config['JWT_SECRET_KEY'] = 'super-secret'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # Token expiration time (1 hour)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600000  # Token expiration time (1 hour)
 
 # Initialize SQLAlchemy with the Flask app
 migrate = Migrate(app, db)

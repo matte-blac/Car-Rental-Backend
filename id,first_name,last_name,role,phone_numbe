@@ -1,0 +1,7 @@
+id,first_name,last_name,role,phone_number,email,password
+1,John,Doe,admin,1234567890,john.doe@example.com,$2b$12$7v0KF2yOSEao5KobKbVMle44XsBP4s7gS8r4UhTv/emlclVbsYjRi
+2,Kevin,Olongo,admin,751922834,kevinolongo9@gmail.com,$2b$12$gDMlEYdVWfeXC9I4q6IdY.Nmn5dHerCDE8hAT/qx/FdwICfLEHpc6
+3,Jac,Bin,user,761922834,jacbin@gmail.com,$2b$12$uoG6mGO67a4vY7jiADEA2ePhmVTpWE9kVnKwilggquKfIc8/DBRJi
+4,james,Apiyo,user,768635340,jamesapiyo2@gmail.com,$2b$12$q57a731YTUe5Q5xy4pMCLeT63YXiKzS1OBBKljju2pY2UPhz6Uks2
+5,John,Doe,user,1234567890,user@example.com,$2b$12$SYKpLY6lFk1QtRyTn29zPedP/pQJQ.A2o17lu5roFLV.PnMpF4wmq
+6,John,Doe,user,1234567890,user2@example.com,$2b$12$hbPkRjXnKzMP/MQ2E0bg6.dd9FcZhM6vHN11cFHAz1an8NnfguFny
