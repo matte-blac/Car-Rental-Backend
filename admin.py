@@ -26,10 +26,11 @@ class AvailableCarResource(Resource):
             "id": availablecar.id,
             "car_name": availablecar.car_name,
             "quantity": availablecar.quantity,
-            "category": availablecar.brand,
+            "brand": availablecar.brand,
             "image_url": availablecar.image_url,
             "price": availablecar.price,
-            "number_plate": availablecar.number_plate
+            "number_plate": availablecar.number_plate,
+            "category_id": availablecar.category_id
         }
 
     @jwt_required()
@@ -38,6 +39,8 @@ class AvailableCarResource(Resource):
             current_user = User.query.filter_by(email=get_jwt_identity()).first()
             if not current_user:
                 return {"error": "User not authenticated"}, 401
+            if current_user.role != 'admin':
+                return {"error": "User not Admin"}, 403
 
             data = request.get_json()
             new_availablecar = AvailableCar(
@@ -46,7 +49,8 @@ class AvailableCarResource(Resource):
                 brand=data['brand'],
                 image_url=data['image_url'],
                 price=data['price'],
-                number_plate=data['number_plate']
+                number_plate=data['number_plate'],
+                category_id=data['category_id']
             )
             db.session.add(new_availablecar)
             db.session.commit()
@@ -61,7 +65,8 @@ class AvailableCarResource(Resource):
                     "brand": new_availablecar.brand,
                     "image_url": new_availablecar.image_url,
                     "price": new_availablecar.price,
-                    "number_plate": new_availablecar.number_plate
+                    "number_plate": new_availablecar.number_plate,
+                    "category_id": new_availablecar.category_id
                 }
             }
         except Exception as e:
@@ -82,7 +87,8 @@ class AdminAvailableCarResource(Resource):
                 brand=data['brand'],
                 image_url=data['image_url'],
                 price=data['price'],
-                number_plate=data['number_plate']
+                number_plate=data['number_plate'],
+                category_id=data['category_id']
             )
             db.session.add(new_availablecar)
             db.session.commit()
@@ -97,7 +103,8 @@ class AdminAvailableCarResource(Resource):
                     "brand": new_availablecar.brand,
                     "image_url": new_availablecar.image_url,
                     "price": new_availablecar.price,
-                    "number_plate": new_availablecar.number_plate
+                    "number_plate": new_availablecar.number_plate,
+                    "category_id": new_availablecar.category_id
                 }
             }
         except Exception as e:
@@ -121,6 +128,7 @@ class AdminAvailableCarResource(Resource):
             availablecar.image_url = data['image_url']
             availablecar.price = data['price']
             availablecar.number_plate =data['number_plate']
+            availablecar.category_id = data['category_id']
             db.session.commit()
 
             # Return the details of the updated Car
@@ -133,7 +141,8 @@ class AdminAvailableCarResource(Resource):
                     "brand": availablecar.brand,
                     "image_url": availablecar.image_url,
                     "price": availablecar.price,
-                    "number_plate":availablecar.number_plate
+                    "number_plate":availablecar.number_plate,
+                    "category_id": availablecar.category_id
                 }
             }
         except Exception as e:
@@ -171,19 +180,4 @@ class UserResource(Resource):
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
-        
-
-
-#         {
-#   "name": "Audi",
-#   "quantity": "2",
-#   "brand": "Q7",
-#   "image_url": "https://media.ed.edmunds-media.com/audi/q7/2022/oem/2022_audi_q7_4dr-suv_prestige_fq_oem_1_1280.jpg",
-#   "price": "8000",
-#   "number_plate": "KDG 085K"
-#                 }
-
-
-# {
-#   "message": "Internal Server Error"
-# }
+    
