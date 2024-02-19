@@ -171,19 +171,4 @@ class UserResource(Resource):
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
-        
-
-
-#         {
-#   "name": "Audi",
-#   "quantity": "2",
-#   "brand": "Q7",
-#   "image_url": "https://media.ed.edmunds-media.com/audi/q7/2022/oem/2022_audi_q7_4dr-suv_prestige_fq_oem_1_1280.jpg",
-#   "price": "8000",
-#   "number_plate": "KDG 085K"
-#                 }
-
-
-# {
-#   "message": "Internal Server Error"
-# }
+    
