@@ -26,10 +26,11 @@ class AvailableCarResource(Resource):
             "id": availablecar.id,
             "car_name": availablecar.car_name,
             "quantity": availablecar.quantity,
-            "category": availablecar.brand,
+            "brand": availablecar.brand,
             "image_url": availablecar.image_url,
             "price": availablecar.price,
-            "number_plate": availablecar.number_plate
+            "number_plate": availablecar.number_plate,
+            "category_id": availablecar.category_id
         }
 
     @jwt_required()
@@ -48,7 +49,8 @@ class AvailableCarResource(Resource):
                 brand=data['brand'],
                 image_url=data['image_url'],
                 price=data['price'],
-                number_plate=data['number_plate']
+                number_plate=data['number_plate'],
+                category_id=data['category_id']
             )
             db.session.add(new_availablecar)
             db.session.commit()
@@ -63,7 +65,8 @@ class AvailableCarResource(Resource):
                     "brand": new_availablecar.brand,
                     "image_url": new_availablecar.image_url,
                     "price": new_availablecar.price,
-                    "number_plate": new_availablecar.number_plate
+                    "number_plate": new_availablecar.number_plate,
+                    "category_id": new_availablecar.category_id
                 }
             }
         except Exception as e:
@@ -84,7 +87,8 @@ class AdminAvailableCarResource(Resource):
                 brand=data['brand'],
                 image_url=data['image_url'],
                 price=data['price'],
-                number_plate=data['number_plate']
+                number_plate=data['number_plate'],
+                category_id=data['category_id']
             )
             db.session.add(new_availablecar)
             db.session.commit()
@@ -99,7 +103,8 @@ class AdminAvailableCarResource(Resource):
                     "brand": new_availablecar.brand,
                     "image_url": new_availablecar.image_url,
                     "price": new_availablecar.price,
-                    "number_plate": new_availablecar.number_plate
+                    "number_plate": new_availablecar.number_plate,
+                    "category_id": new_availablecar.category_id
                 }
             }
         except Exception as e:
@@ -123,6 +128,7 @@ class AdminAvailableCarResource(Resource):
             availablecar.image_url = data['image_url']
             availablecar.price = data['price']
             availablecar.number_plate =data['number_plate']
+            availablecar.category_id = data['category_id']
             db.session.commit()
 
             # Return the details of the updated Car
@@ -135,7 +141,8 @@ class AdminAvailableCarResource(Resource):
                     "brand": availablecar.brand,
                     "image_url": availablecar.image_url,
                     "price": availablecar.price,
-                    "number_plate":availablecar.number_plate
+                    "number_plate":availablecar.number_plate,
+                    "category_id": availablecar.category_id
                 }
             }
         except Exception as e:
