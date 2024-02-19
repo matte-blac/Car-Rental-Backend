@@ -105,4 +105,4 @@ class LogoutResource(Resource):
             return {"message": "Logout successful."}, 200
         except Exception as e:
             # Return an error message for any unexpected errors
-            return {"error": str(e)}, 500
+            return {"error": str(e)}, 500 
