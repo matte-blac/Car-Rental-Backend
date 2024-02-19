@@ -84,7 +84,6 @@ class LoginResource(Resource):
                 # Return a success message along with the user's details and token
                 return {
                     "message": "Login successful.",
-                    "user": {"id": user.id, "email": user.email},
                     "access_token": access_token,
                     "refresh_token": refresh_token
                 }, 200

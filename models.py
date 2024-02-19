@@ -64,6 +64,7 @@ class HiredCar(db.Model, SerializerMixin):
     return_date = db.Column(db.DateTime, nullable=False)
     pickup_location = db.Column(db.String, nullable=False)
     destination = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default='pending', nullable=False)
 
     # Foreign Key to Users
     users_id = db.Column(db.Integer, db.ForeignKey('users.id', name='fk_users') , nullable=True)
