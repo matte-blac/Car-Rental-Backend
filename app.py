@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_restful import Api
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from models import db, AvailableCar, HiredCar, User, Category
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
@@ -12,6 +13,7 @@ from hire import AdminActionResource, HireResource, HireStatusResource
 
 # Create Flask application instance
 app = Flask(__name__)
+CORS(app)
 
 # Configure SQLAlchemy to use SQLite database located at 'app.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
