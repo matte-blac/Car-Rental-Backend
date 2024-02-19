@@ -180,4 +180,50 @@ class UserResource(Resource):
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
+        
+
+        #...........user role update by admin......................
+
+class UserRoleResource(Resource):
+    @jwt_required()
+    def patch(self, user_id):
+        try:
+            # Check if the current user is an admin
+            current_user = User.query.filter_by(email=get_jwt_identity()).first()
+            if not current_user or current_user.role != 'admin':
+                return {"error": "Access denied. Admins only."}, 403
+
+            # Retrieve the user to update
+            user_to_update = User.query.get(user_id)
+            if not user_to_update:
+                return {"error": "User not found."}, 404
+
+            # Parse the request data
+            data = request.get_json()
+
+            # Check if the role field is provided in the request
+            if 'role' not in data:
+                return {"error": "Role field is required."}, 400
+
+            # Check if the role is either 'admin' or 'user'
+            new_role = data['role']
+            if new_role not in ['admin', 'user']:
+                return {"error": "Invalid role. Role must be either 'admin' or 'user'."}, 400
+
+            # Update the user's role
+            user_to_update.role = new_role
+            db.session.commit()
+
+            # Return success message
+            return {
+                "message": f"User role updated successfully. New role: {new_role}.",
+                "user": {
+                    "id": user_to_update.id,
+                    "email": user_to_update.email,
+                    "role": user_to_update.role
+                }
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
     

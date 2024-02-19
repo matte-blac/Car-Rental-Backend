@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from users import UsersResource
 from login import LoginResource, UserRegistrationResource
-from admin import AvailableCarResource,AdminAvailableCarResource
+from admin import AvailableCarResource,AdminAvailableCarResource, UserRoleResource
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from hire import AdminActionResource, HireStatusResource, HireResource
 from hire import AdminActionResource, HireResource, HireStatusResource
@@ -46,6 +46,10 @@ api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id
 api.add_resource(HireResource, '/hire')
 api.add_resource(HireStatusResource, '/hire_status/<int:user_id>')
 api.add_resource(AdminActionResource, '/admin/action')
+
+# udate user role endpoint
+api.add_resource(UserRoleResource, '/usersrole/<int:user_id>/role')
+
 
 #get all available cars
 @app.route('/availablecars')
@@ -105,7 +109,7 @@ def delete_availablecar(availablecars_id):
     else:
         return jsonify ({'message': 'Error deleting car'})
 
-#add new available car
+# add new available car
 @app.route('/availablecars', methods=['POST'])
 def add_availablecar():
     data = request.json
@@ -169,7 +173,7 @@ def delete_category(categories_id):
     else:
         return jsonify ({'message': 'Error deleting category'})
 
-#add new category
+# add new category
 @app.route('/categories', methods=['POST'])
 def add_category():
     data = request.json
