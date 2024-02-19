@@ -8,8 +8,8 @@ class AvailableCarResource(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('car_name', type=str, required=True, help='Car name cannot be blank')
     parser.add_argument('quantity', type=int, required=True, help='Quantity cannot be blank')
-    parser.add_argument('brand', type=int,required=True, help='brand cannot be blank')
-    parser.add_argument('image_url', type=int,required=True, help='Image cannot be blank')
+    parser.add_argument('brand', type=str,required=True, help='brand cannot be blank')
+    parser.add_argument('image_url', type=str,required=True, help='Image cannot be blank')
     parser.add_argument('price', type=float, required=True, help='Price cannot be blank')
     parser.add_argument('number_plate', type=str, required=True, help='Number plate cannot be blank')
     @jwt_required(True)
@@ -35,12 +35,19 @@ class AvailableCarResource(Resource):
     @jwt_required()
     def post(self):
         try:
-            current_user = User.query.filter_by(username=get_jwt_identity()).first()
-            if current_user.role != 'admin':
-                return {"error": "Access denied. Admins only."}, 403
+            current_user = User.query.filter_by(email=get_jwt_identity()).first()
+            if not current_user:
+                return {"error": "User not authenticated"}, 401
 
             data = request.get_json()
-            new_availablecar = AvailableCar(car_name=data['name'], quantity=data['quantity'], brand=data['brand'], image_url=data['image_url'], price=data['price'], number_plate =data['number_plate'])
+            new_availablecar = AvailableCar(
+                car_name=data['car_name'],
+                quantity=data['quantity'],
+                brand=data['brand'],
+                image_url=data['image_url'],
+                price=data['price'],
+                number_plate=data['number_plate']
+            )
             db.session.add(new_availablecar)
             db.session.commit()
 
@@ -58,18 +65,25 @@ class AvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
 class AdminAvailableCarResource(Resource):
     @jwt_required()
     def post(self):
         try:
-            current_user = User.query.filter_by(username=get_jwt_identity()).first()
-            if current_user.role != 'admin':
-                return {"error": "Access denied. Admins only."}, 403
+            current_user = User.query.filter_by(email=get_jwt_identity()).first()
+            if not current_user:
+                return {"error": "User not authenticated"}, 401
 
             data = request.get_json()
-            new_availablecar = AvailableCar(car_name=data['name'], quantity=data['quantity'], brand=data['brand'], image_url=data['image_url'], price=data['price'], number_plate =data['number_plate'])
+            new_availablecar = AvailableCar(
+                car_name=data['name'],
+                quantity=data['quantity'],
+                brand=data['brand'],
+                image_url=data['image_url'],
+                price=data['price'],
+                number_plate=data['number_plate']
+            )
             db.session.add(new_availablecar)
             db.session.commit()
 
@@ -87,12 +101,12 @@ class AdminAvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
     @jwt_required()
     def patch(self, availablecar_id):
         try:
-            current_user = User.query.filter_by(username=get_jwt_identity()).first()
+            current_user = User.query.filter_by(email=get_jwt_identity()).first()
             if current_user.role != 'admin':
                 return {"message": "Access denied. Admins only."}, 403
 
@@ -123,11 +137,11 @@ class AdminAvailableCarResource(Resource):
                 }
             }
         except Exception as e:
-            return {"error": str(e.message)}, 500
+            return {"error": str(e)}, 500
 
     @jwt_required()
     def delete(self, availablecar_id):
-        current_user = User.query.filter_by(username=get_jwt_identity()).first()
+        current_user = User.query.filter_by(email=get_jwt_identity()).first()
         if current_user.role != 'admin':
             return {"message": "Access denied. Admins only."}, 403
 
@@ -145,15 +159,31 @@ class UserResource(Resource):
     def get(self):
         try:
             current_user = get_jwt_identity()
-            user = User.query.filter_by(username=current_user).first()
+            user = User.query.filter_by(email=current_user).first()
 
             if user:
                 return {
                     "id": user.id,
-                    "username": user.username,
+                    "email": user.email,
                     "role": user.role,
                 }, 200
             else:
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
+        
+
+
+#         {
+#   "name": "Audi",
+#   "quantity": "2",
+#   "brand": "Q7",
+#   "image_url": "https://media.ed.edmunds-media.com/audi/q7/2022/oem/2022_audi_q7_4dr-suv_prestige_fq_oem_1_1280.jpg",
+#   "price": "8000",
+#   "number_plate": "KDG 085K"
+#                 }
+
+
+# {
+#   "message": "Internal Server Error"
+# }
