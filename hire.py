@@ -78,7 +78,8 @@ class HireStatusResource(Resource):
                 'hired_date': hire.hired_date.strftime('%Y-%m-%d'),
                 'return_date': hire.return_date.strftime('%Y-%m-%d'),
                 'pickup_location': hire.pickup_location,
-                'destination': hire.destination
+                'destination': hire.destination,
+                'status': hire.status
             }
             hire_status.append(status)
 

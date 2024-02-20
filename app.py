@@ -5,15 +5,16 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
-from admin import AvailableCarResource,AdminAvailableCarResource
+from admin import AvailableCarResource,AdminAvailableCarResource, UserRoleResource
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from hire import AdminActionResource, HireStatusResource, HireResource
 from hire import AdminActionResource, HireResource, HireStatusResource
 
 # Create Flask application instance
 app = Flask(__name__)
-# Enable CORS for all domains
-CORS(app) 
+
+CORS(app)
+
 # Configure SQLAlchemy to use SQLite database located at 'app.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -21,7 +22,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 jwt = JWTManager(app)
 # Set the secret key for JWT token
 app.config['JWT_SECRET_KEY'] = 'super-secret'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # Token expiration time (1 hour)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600000  # Token expiration time (1 hour)
 
 # Initialize SQLAlchemy with the Flask app
 migrate = Migrate(app, db)
@@ -53,7 +54,6 @@ api.add_resource(HireResource, '/hire')
 api.add_resource(HireStatusResource, '/hire_status/<int:user_id>')
 # Endpoint for admin actions
 api.add_resource(AdminActionResource, '/admin/action')
-
 
 #get all available cars
 @app.route('/availablecars')
@@ -102,6 +102,18 @@ def update_availablecar(availablecars_id):
     else:
         return jsonify({"message": 'Car not found. Failed to update.'})
 
+#search for car
+@app.route('/cars/<search_term>')
+def search_cars(search_term):
+    # Perform search query using SQLAlchemy
+    search_results = AvailableCar.query.filter(
+        (AvailableCar.brand.ilike(f'%{search_term}%')) |
+        (AvailableCar.car_name.ilike(f'%{search_term}%'))
+    ).all()
+    # Serialize search results and return as JSON
+    return jsonify([car.serialize() for car in search_results])
+
+    
 #delete available car by id
 @app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
 def delete_availablecar(availablecars_id):
@@ -113,7 +125,7 @@ def delete_availablecar(availablecars_id):
     else:
         return jsonify ({'message': 'Error deleting car'})
 
-#add new available car
+# add new available car
 @app.route('/availablecars', methods=['POST'])
 def add_availablecar():
     data = request.json
@@ -177,7 +189,7 @@ def delete_category(categories_id):
     else:
         return jsonify ({'message': 'Error deleting category'})
 
-#add new category
+# add new category
 @app.route('/categories', methods=['POST'])
 def add_category():
     data = request.json

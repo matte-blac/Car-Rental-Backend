@@ -40,6 +40,13 @@ class AvailableCar(db.Model, SerializerMixin):
     image_url = db.Column(db.String(255), nullable=False)
     number_plate = db.Column(db.String, unique=True, nullable=False)
 
+    def serialize(self):
+        return {
+            'id': self.id,
+            'brand': self.brand,
+            'car_name': self.car_name,
+        }
+
     # relationship to HiredCars
     hired_cars = db.relationship('HiredCar', backref='availablecar', lazy=True)
 
@@ -64,6 +71,7 @@ class HiredCar(db.Model, SerializerMixin):
     return_date = db.Column(db.DateTime, nullable=False)
     pickup_location = db.Column(db.String, nullable=False)
     destination = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default='pending', nullable=False)
 
     # Foreign Key to Users
     users_id = db.Column(db.Integer, db.ForeignKey('users.id', name='fk_users') , nullable=True)
