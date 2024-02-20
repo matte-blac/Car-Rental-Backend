@@ -100,6 +100,18 @@ def update_availablecar(availablecars_id):
     else:
         return jsonify({"message": 'Car not found. Failed to update.'})
 
+#search for car
+@app.route('/cars/<search_term>')
+def search_cars(search_term):
+    # Perform search query using SQLAlchemy
+    search_results = AvailableCar.query.filter(
+        (AvailableCar.brand.ilike(f'%{search_term}%')) |
+        (AvailableCar.car_name.ilike(f'%{search_term}%'))
+    ).all()
+    # Serialize search results and return as JSON
+    return jsonify([car.serialize() for car in search_results])
+
+    
 #delete available car by id
 @app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
 def delete_availablecar(availablecars_id):
