@@ -173,6 +173,9 @@ class UserResource(Resource):
             if user:
                 return {
                     "id": user.id,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "phone_number": user.phone_number,
                     "email": user.email,
                     "role": user.role,
                 }, 200
