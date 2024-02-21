@@ -1,9 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_restful import Api
-from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from models import db, AvailableCar, HiredCar, User, Category
+from users import UsersResource
 from login import LoginResource, UserRegistrationResource
 from admin import AvailableCarResource,AdminAvailableCarResource, UserRoleResource
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
@@ -12,7 +13,6 @@ from hire import AdminActionResource, HireResource, HireStatusResource
 
 # Create Flask application instance
 app = Flask(__name__)
-
 CORS(app)
 
 # Configure SQLAlchemy to use SQLite database located at 'app.db'
@@ -34,26 +34,25 @@ migrate = Migrate(app, db)
 
 # Add Users resource to the Flask-RESTful API with the endpoint '/users'
 api = Api(app)
+CORS(api)
+api.add_resource(UsersResource, '/users')
 
-
-# Endpoint for user login
+# Add Login resource to the Flask-RESTful API with the endpoint '/login'
 api.add_resource(LoginResource, '/login')
 
-# Endpoint for user registration
 # Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
 api.add_resource(UserRegistrationResource, '/register')
 
-# Endpoints for retrieving and managing available cars
 api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
-# Endpoint for admin actions on available cars
 api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>')
 
-# Endpoint for hiring a car
 api.add_resource(HireResource, '/hire')
-# Endpoint for checking hire status
 api.add_resource(HireStatusResource, '/hire_status/<int:user_id>')
-# Endpoint for admin actions
 api.add_resource(AdminActionResource, '/admin/action')
+
+# udate user role endpoint
+api.add_resource(UserRoleResource, '/usersrole/<int:user_id>/role')
+
 
 #get all available cars
 @app.route('/availablecars')
@@ -102,18 +101,6 @@ def update_availablecar(availablecars_id):
     else:
         return jsonify({"message": 'Car not found. Failed to update.'})
 
-#search for car
-@app.route('/cars/<search_term>')
-def search_cars(search_term):
-    # Perform search query using SQLAlchemy
-    search_results = AvailableCar.query.filter(
-        (AvailableCar.brand.ilike(f'%{search_term}%')) |
-        (AvailableCar.car_name.ilike(f'%{search_term}%'))
-    ).all()
-    # Serialize search results and return as JSON
-    return jsonify([car.serialize() for car in search_results])
-
-    
 #delete available car by id
 @app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
 def delete_availablecar(availablecars_id):
