@@ -12,7 +12,6 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
 )
-from hire import AdminActionResource, HireStatusResource, HireResource
 from hire import AdminActionResource, HireResource, HireStatusResource
 
 # Create Flask application instance
