@@ -5,7 +5,9 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
-from admin import AvailableCarResource, AdminAvailableCarResource, UserResource
+from admin import AdminAvailableCarResource
+from users import UserResource
+from availablecars import AvailableCarResource
 from flask_jwt_extended import (
     JWTManager,
     jwt_required,
