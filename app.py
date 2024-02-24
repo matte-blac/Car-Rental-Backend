@@ -68,54 +68,6 @@ api.add_resource(HireStatusResource, "/hire_status/<int:user_id>")
 # Endpoint for admin actions
 api.add_resource(AdminActionResource, "/admin/action")
 
-
-# get all available cars
-@app.route("/availablecars")
-def get_availablecars():
-    availablecars = AvailableCar.query.all()
-    cars_list = []
-    for car in availablecars:
-        car_dict = {
-            "id": car.id,
-            "brand": car.brand,
-            "price": car.price,
-            "car_name": car.car_name,
-            "quantity": car.quantity,
-            "image_url": car.image_url,
-            "number_plate": car.number_plate,
-        }
-        cars_list.append(car_dict)
-    return jsonify(cars_list)
-
-
-# get available cars by id
-@app.route("/availablecars/<int:availablecars_id>", methods=["GET"])
-def get_availablecars_by_id(availablecars_id):
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        return jsonify({"id": car.id, "brand": car.brand}), 200
-    else:
-        return jsonify({"error": "Car not found"}, 400)
-
-
-# update available cars
-@app.route("/availablecars/<int:availablecars_id>", methods=["PUT"])
-def update_availablecar(availablecars_id):
-    data = request.json
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        car.brand = data.get("brand", car.brand)
-        car.price = data.get("price", car.price)
-        car.car_name = data.get("car_name", car.car_name)
-        car.quantity = data.get("quantity", car.quantity)
-        car.image_url = data.get("image_url", car.image_url)
-        car.number_plate = data.get("number_plate", car.number_plate)
-        db.session.commit()
-        return jsonify({"message": "Available car updated successfully"})
-    else:
-        return jsonify({"message": "Car not found. Failed to update."})
-
-
 # search for car
 @app.route("/cars/<search_term>")
 def search_cars(search_term):
@@ -126,36 +78,6 @@ def search_cars(search_term):
     ).all()
     # Serialize search results and return as JSON
     return jsonify([car.serialize() for car in search_results])
-
-
-# delete available car by id
-@app.route("/availablecars/<int:availablecars_id>", methods=["DELETE"])
-def delete_availablecar(availablecars_id):
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        db.session.delete(car)
-        db.session.commit()
-        return jsonify({"message": "Available car has been deleted"})
-    else:
-        return jsonify({"message": "Error deleting car"})
-
-
-# add new available car
-@app.route("/availablecars", methods=["POST"])
-def add_availablecar():
-    data = request.json
-    new_car = AvailableCar(
-        brand=data["brand"],
-        price=data["price"],
-        car_name=data["car_name"],
-        quantity=data["quantity"],
-        image_url=data["image_url"],
-        number_plate=data["number_plate"],
-    )
-    db.session.add(new_car)
-    db.session.commit()
-    return jsonify({"message": "New car addded succssfully"})
-
 
 # get all categories
 @app.route("/categories")
