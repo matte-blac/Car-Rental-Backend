@@ -30,6 +30,38 @@ class UserResource(Resource):
         except Exception as e:
             return {"error": str(e)}, 500
 
+    def patch(self):
+        try:
+            current_user = get_jwt_identity()
+            user = User.query.filter_by(email=current_user).first()
+
+            if user:
+                # parse the JSON patch document from the request
+                parser = reqparse.RequestParser()
+                parser.add_argument("first_name", type=str)
+                parser.add_argument("last_name", type=str)
+                parser.add_argument("phone_number", type=int)
+                parser.add_argument("email", type=str)
+                args = parser.parse_args()
+
+                # apply the changes to the user
+                if args["first_name"]:
+                    user.first_name = args["first_name"]
+                if args["last_name"]:
+                    user.last_name = args["last_name"]
+                if args["phone_number"]:
+                    user.phone_number = args["phone_number"]
+                if args["email"]:
+                    user.email = args["email"]
+
+                db.session.commit()
+
+                return {"message": "User updated successfully."}, 200
+            else:
+                return {"message": "User not found"}, 404
+        except Exception as e:
+            return {"error": str(e)}, 500
+
 
 class UserRoleResource(Resource):
     @jwt_required()
