@@ -42,6 +42,7 @@ class AvailableCarResource(Resource):
                     "quantity": car.quantity,
                     "image_url": car.image_url,
                     "number_plate": car.number_plate,
+                    "category_id": car.category_id,
                 }
                 cars_list.append(car_dict)
             return jsonify(cars_list)
@@ -119,6 +120,7 @@ class AvailableCarResource(Resource):
             car.quantity = data.get("quantity", car.quantity)
             car.image_url = data.get("image_url", car.image_url)
             car.number_plate = data.get("number_plate", car.number_plate)
+            car.category_id = data.get("category_id", car.category_id)
             db.session.commit()
             return jsonify({"message": "Available car updated successfully"})
         else:
