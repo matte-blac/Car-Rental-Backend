@@ -53,7 +53,7 @@ class AdminAvailableCarResource(Resource):
                 return {"message": "Car not found."}, 404
 
             data = request.get_json()
-            availablecar.car_name = data['name']
+            availablecar.car_name = data['car_name']
             availablecar.quantity = data['quantity']
             availablecar.brand = data['brand']
             availablecar.image_url = data['image_url']
