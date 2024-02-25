@@ -42,6 +42,7 @@ class AvailableCarResource(Resource):
                     "quantity": car.quantity,
                     "image_url": car.image_url,
                     "number_plate": car.number_plate,
+                    "category_id": car.category_id,
                 }
                 cars_list.append(car_dict)
             return jsonify(cars_list)
