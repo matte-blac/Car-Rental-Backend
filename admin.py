@@ -67,7 +67,7 @@ class AdminAvailableCarResource(Resource):
                 "message": "Car updated successfully.",
                 "product": {
                     "id": availablecar.id,
-                    "name": availablecar.car_name,
+                    "car_name": availablecar.car_name,
                     "quantity": availablecar.quantity,
                     "brand": availablecar.brand,
                     "image_url": availablecar.image_url,
