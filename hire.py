@@ -126,3 +126,65 @@ class AdminActionResource(Resource):
 
 
 
+
+#..................get hire...............................
+
+class AdminAllHiresResource(Resource):
+    def get(self):
+        # Get all hires for admin
+        hires = HiredCar.query.all()
+        hire_details = self.serialize_hires(hires)
+        return {'hires': hire_details}, 200
+
+    def serialize_hires(self, hires):
+        hire_details = []
+        for hire in hires:
+            user = User.query.get(hire.users_id)
+            car = AvailableCar.query.get(hire.availablecars_id)
+            hire_info = {
+                'hire_id': hire.id,
+                'user_id': user.id,
+                'user_email': user.email,
+                'car_id': car.id,
+                'car_name': car.car_name,
+                'hired_date': hire.hired_date.strftime('%Y-%m-%d'),
+                'return_date': hire.return_date.strftime('%Y-%m-%d'),
+                'pickup_location': hire.pickup_location,
+                'destination': hire.destination,
+                'status': hire.status
+            }
+            hire_details.append(hire_info)
+        return hire_details
+
+
+class UserHiresResource(Resource):
+    def get(self, user_id):
+        # Get hires for a specific user
+        hires = HiredCar.query.filter_by(users_id=user_id).all()
+        if not hires:
+            return {'message': 'No hires found for this user'}, 404
+
+        hire_details = self.serialize_hires(hires)
+        return {'user_hires': hire_details}, 200
+
+    def serialize_hires(self, hires):
+        hire_details = []
+        for hire in hires:
+            car = AvailableCar.query.get(hire.availablecars_id)
+            hire_info = {
+                'hire_id': hire.id,
+                'car_id': car.id,
+                'car_name': car.car_name,
+                'hired_date': hire.hired_date.strftime('%Y-%m-%d'),
+                'return_date': hire.return_date.strftime('%Y-%m-%d'),
+                'pickup_location': hire.pickup_location,
+                'destination': hire.destination,
+                'status': hire.status
+            }
+            hire_details.append(hire_info)
+        return hire_details
+
+
+# Add routes to the API
+# api.add_resource(AdminAllHiresResource, '/admin/hires')
+# api.add_resource(UserHiresResource, '/user/<int:user_id>/hires')

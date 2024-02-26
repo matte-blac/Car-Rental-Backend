@@ -14,7 +14,7 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
 )
-from hire import AdminActionResource, HireResource, HireStatusResource
+from hire import AdminActionResource, HireResource, HireStatusResource, AdminAllHiresResource, UserHiresResource
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -67,6 +67,11 @@ api.add_resource(HireResource, "/hire")
 api.add_resource(HireStatusResource, "/hire_status/<int:user_id>")
 # Endpoint for admin actions
 api.add_resource(AdminActionResource, "/admin/action")
+
+
+# Add routes to the API
+api.add_resource(AdminAllHiresResource, '/admin/hires')
+api.add_resource(UserHiresResource, '/user/<int:user_id>/hires')
 
 # search for car
 @app.route("/cars/<search_term>")
