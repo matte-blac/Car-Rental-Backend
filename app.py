@@ -18,8 +18,6 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
 )
-from hire import AdminActionResource, HireResource, HireStatusResource
-
 
 app = Flask(__name__)
 CORS(app)
@@ -198,7 +196,7 @@ def lipa_na_mpesa():
             "PartyA": phone_number,
             "PartyB": SHORTCODE,
             "PhoneNumber": phone_number,
-            "CallBackURL": "https://8ead-41-80-111-14.ngrok-free.app/callback_url",
+            "CallBackURL": "https://car-rental-service-22al.onrender.com/callback_url/",
             "AccountReference": "carhire",
             "TransactionDesc": "Payment for testing",
             "payment_info": payment_info 
@@ -235,7 +233,7 @@ def generate_token():
     }
 
     try:
-        response = requests.get(token_endpoint, headers=headers)
+        response = requests.post(token_endpoint, headers=headers)
         response.raise_for_status()  
         return response.json().get('access_token')
     except requests.exceptions.RequestException as e:
