@@ -56,7 +56,7 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(UserRegistrationResource, "/register")
 
 api.add_resource(UserResource, "/current_user")
-api.add_resource(UserUpdateResource, "/current_user/update")
+api.add_resource(UserUpdateResource, "/update_user")
 
 
 # Endpoints for retrieving and managing available cars
