@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
 from admin import AdminAvailableCarResource
-from users import UserResource
+from users import UserResource, UserUpdateResource
 from availablecars import AvailableCarResource
 from flask_jwt_extended import (
     JWTManager,
@@ -14,7 +14,13 @@ from flask_jwt_extended import (
     create_access_token,
     get_jwt_identity,
 )
-from hire import AdminActionResource, HireResource, HireStatusResource, AdminAllHiresResource, UserHiresResource
+from hire import (
+    AdminActionResource,
+    HireResource,
+    HireStatusResource,
+    AdminAllHiresResource,
+    UserHiresResource,
+)
 
 # Create Flask application instance
 app = Flask(__name__)
@@ -50,6 +56,8 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(UserRegistrationResource, "/register")
 
 api.add_resource(UserResource, "/current_user")
+api.add_resource(UserUpdateResource, "/current_user/update")
+
 
 # Endpoints for retrieving and managing available cars
 api.add_resource(
@@ -70,8 +78,9 @@ api.add_resource(AdminActionResource, "/admin/action")
 
 
 # Add routes to the API
-api.add_resource(AdminAllHiresResource, '/admin/hires')
-api.add_resource(UserHiresResource, '/user/<int:user_id>/hires')
+api.add_resource(AdminAllHiresResource, "/admin/hires")
+api.add_resource(UserHiresResource, "/user/<int:user_id>/hires")
+
 
 # search for car
 @app.route("/cars/<search_term>")
@@ -83,6 +92,7 @@ def search_cars(search_term):
     ).all()
     # Serialize search results and return as JSON
     return jsonify([car.serialize() for car in search_results])
+
 
 # get all categories
 @app.route("/categories")
