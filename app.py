@@ -1,4 +1,8 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+import requests
+import base64
+import datetime
+import json
 from flask_restful import Api
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -16,10 +20,22 @@ from flask_jwt_extended import (
 )
 from hire import AdminActionResource, HireResource, HireStatusResource
 
-# Create Flask application instance
-app = Flask(__name__)
 
+app = Flask(__name__)
 CORS(app)
+
+# Replace these values with your actual Safaricom Daraja API credentials
+CONSUMER_KEY = "V9fxIEMJoQZoLMGJTR7KNSFUlEACwkc3IGlwAcuFKlXtntG0"
+CONSUMER_SECRET = "nFYKGwWdAiGB9l31HGGIi5LUibx0oG39jSzZSnDi7JwYUHdrwfjK11OT1zgBZnr1"
+LIPA_NA_MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+SHORTCODE = "174379"
+LIPA_NA_MPESA_ONLINE_ENDPOINT = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+
+# Token cache
+token_cache = {
+    "token": None,
+    "expiry_time": None
+}
 
 # Configure SQLAlchemy to use SQLite database located at 'app.db'
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
@@ -138,6 +154,92 @@ def add_category():
     return jsonify({"message": "Category addded succssfully"})
 
 
-# Start the Flask application if this script is executed directly
-if __name__ == "__main__":
-    app.run(port=5555, debug=True)
+# Payment logic
+@app.route('/callback_url', methods=['POST'])
+def callback_url():
+    data = request.json
+
+    # Process the callback data
+    transaction_status = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
+    print(data)
+    if transaction_status == 0:
+        print("Payment successful")
+    else:
+        # Payment failed
+        # Handle the failure scenario
+        print("Payment failed")
+
+    return jsonify({"ResultCode": 0, "ResultDesc": "Success"})  # Respond to Safaricom with a success message
+
+@app.route('/lipa_na_mpesa', methods=['POST'])
+def lipa_na_mpesa():
+    try:
+        token = get_or_generate_token()
+        if token is None:
+            return jsonify({"error": "Failed to generate token"}), 500
+
+        data = request.json
+        phone_number = data.get('phone_number')
+        amount = data.get('amount')
+        payment_info = data.get('payment_info')  # New field for payment information
+        
+        if not phone_number or not amount or not payment_info:
+            return jsonify({"error": "Phone number, amount, and payment info are required"}), 400
+
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        password = base64.b64encode((SHORTCODE + LIPA_NA_MPESA_PASSKEY + timestamp).encode()).decode('utf-8')
+
+        payload = {
+            "BusinessShortCode": SHORTCODE,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": amount,
+            "PartyA": phone_number,
+            "PartyB": SHORTCODE,
+            "PhoneNumber": phone_number,
+            "CallBackURL": "https://8ead-41-80-111-14.ngrok-free.app/callback_url",
+            "AccountReference": "carhire",
+            "TransactionDesc": "Payment for testing",
+            "payment_info": payment_info 
+        }
+
+        headers = {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(LIPA_NA_MPESA_ONLINE_ENDPOINT, json=payload, headers=headers)
+
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_or_generate_token():
+    global token_cache
+
+    if token_cache["token"] is None or token_cache["expiry_time"] is None or token_cache["expiry_time"] < datetime.datetime.now():
+        token = generate_token()
+        if token is None:
+            return None
+        token_cache["token"] = token
+        token_cache["expiry_time"] = datetime.datetime.now() + datetime.timedelta(hours=1)
+    
+    return token_cache["token"]
+
+def generate_token():
+    token_endpoint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    credentials = base64.b64encode((CONSUMER_KEY + ':' + CONSUMER_SECRET).encode()).decode('utf-8')
+    headers = {
+        'Authorization': 'Basic ' + credentials
+    }
+
+    try:
+        response = requests.get(token_endpoint, headers=headers)
+        response.raise_for_status()  
+        return response.json().get('access_token')
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Failed to generate token: {e}") from e
+
+if __name__ == '__main__':
+    app.run(debug=True)
