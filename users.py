@@ -41,11 +41,6 @@ class UserResource(Resource):
                 if current_user.role != 'admin' and current_user.id != user.id:
                     return {'error': 'access denied. Only the user themself or an admin can delete the user.'}, 403
                 
-                # add a confirmation mechanism
-                confirmation = input('Are you sure you want to delete this user? This operation is irreversible. (yes/no): ')
-                if confirmation.lower() != 'yes':
-                    return {'message': 'User deleteion cancelled.'}, 200
-                
                 db.session.delete(user)
                 db.session.commit()
                 return {'message': 'User deleted successfully.'}, 200
