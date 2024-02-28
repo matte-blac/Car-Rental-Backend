@@ -29,7 +29,9 @@ class UserResource(Resource):
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
-
+        
+class UserUpdateResource(Resource):
+    @jwt_required()
     def patch(self):
         try:
             current_user = get_jwt_identity()

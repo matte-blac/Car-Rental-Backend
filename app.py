@@ -10,13 +10,20 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
 from admin import AdminAvailableCarResource
-from users import UserResource
+from users import UserResource, UserUpdateResource
 from availablecars import AvailableCarResource
 from flask_jwt_extended import (
     JWTManager,
     jwt_required,
     create_access_token,
     get_jwt_identity,
+)
+from hire import (
+    AdminActionResource,
+    HireResource,
+    HireStatusResource,
+    AdminAllHiresResource,
+    UserHiresResource,
 )
 
 app = Flask(__name__)
@@ -64,6 +71,8 @@ api.add_resource(LoginResource, "/login")
 api.add_resource(UserRegistrationResource, "/register")
 
 api.add_resource(UserResource, "/current_user")
+api.add_resource(UserUpdateResource, "/update_user")
+
 
 # Endpoints for retrieving and managing available cars
 api.add_resource(
@@ -82,6 +91,12 @@ api.add_resource(HireStatusResource, "/hire_status/<int:user_id>")
 # Endpoint for admin actions
 api.add_resource(AdminActionResource, "/admin/action")
 
+
+# Add routes to the API
+api.add_resource(AdminAllHiresResource, "/admin/hires")
+api.add_resource(UserHiresResource, "/user/<int:user_id>/hires")
+
+
 # search for car
 @app.route("/cars/<search_term>")
 def search_cars(search_term):
@@ -92,6 +107,7 @@ def search_cars(search_term):
     ).all()
     # Serialize search results and return as JSON
     return jsonify([car.serialize() for car in search_results])
+
 
 # get all categories
 @app.route("/categories")
@@ -167,22 +183,19 @@ def callback_url():
         # Handle the failure scenario
         print("Payment failed")
 
-    return jsonify({"ResultCode": 0, "ResultDesc": "Success"})  # Respond to Safaricom with a success message
+    return jsonify({"ResultCode": 0, "ResultDesc": "Success"})  
 
 @app.route('/lipa_na_mpesa', methods=['POST'])
 def lipa_na_mpesa():
     try:
-        token = get_or_generate_token()
+        token = generate_token()
         if token is None:
             return jsonify({"error": "Failed to generate token"}), 500
-
-        data = request.json
-        phone_number = data.get('phone_number')
-        amount = data.get('amount')
-        payment_info = data.get('payment_info')  # New field for payment information
+        phone_number = request.json.get('phone_number')
+        amount = request.json.get('amount')
         
-        if not phone_number or not amount or not payment_info:
-            return jsonify({"error": "Phone number, amount, and payment info are required"}), 400
+        if not phone_number or not amount:
+            return jsonify({"error": "Phone number and amount are required"}), 400
 
         timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         password = base64.b64encode((SHORTCODE + LIPA_NA_MPESA_PASSKEY + timestamp).encode()).decode('utf-8')
@@ -196,14 +209,13 @@ def lipa_na_mpesa():
             "PartyA": phone_number,
             "PartyB": SHORTCODE,
             "PhoneNumber": phone_number,
-            "CallBackURL": "https://car-rental-service-22al.onrender.com/callback_url/",
-            "AccountReference": "carhire",
-            "TransactionDesc": "Payment for testing",
-            "payment_info": payment_info 
+            "CallBackURL": "https://8ead-41-80-111-14.ngrok-free.app/callback_url",
+            "AccountReference": "Safari Wheels Kenya",
+            "TransactionDesc": "Payment for testing"
         }
 
         headers = {
-            "Authorization": "Bearer " + token,
+            "Authorization": "Bearer " + generate_token(),
             "Content-Type": "application/json"
         }
 
@@ -212,19 +224,6 @@ def lipa_na_mpesa():
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-def get_or_generate_token():
-    global token_cache
-
-    if token_cache["token"] is None or token_cache["expiry_time"] is None or token_cache["expiry_time"] < datetime.datetime.now():
-        token = generate_token()
-        if token is None:
-            return None
-        token_cache["token"] = token
-        token_cache["expiry_time"] = datetime.datetime.now() + datetime.timedelta(hours=1)
-    
-    return token_cache["token"]
-
 def generate_token():
     token_endpoint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
     credentials = base64.b64encode((CONSUMER_KEY + ':' + CONSUMER_SECRET).encode()).decode('utf-8')
@@ -233,11 +232,12 @@ def generate_token():
     }
 
     try:
-        response = requests.post(token_endpoint, headers=headers)
+        response = requests.get(token_endpoint, headers=headers)
         response.raise_for_status()  
         return response.json().get('access_token')
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Failed to generate token: {e}") from e
+
 
 if __name__ == '__main__':
     app.run(debug=True)
