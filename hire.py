@@ -3,7 +3,6 @@ from flask_restful import Api, Resource, reqparse
 from models import db, User, AvailableCar, HiredCar
 from datetime import datetime, timedelta
 
-
 # Parser for hire requests
 hire_parser = reqparse.RequestParser()
 hire_parser.add_argument('user_id', type=int, required=True, help='User ID is required')
@@ -57,6 +56,7 @@ class HireResource(Resource):
         car.quantity -= 1
         db.session.commit()
 
+       
         return {
             'message': 'Car hired successfully',
             'total_amount': total_amount
