@@ -29,7 +29,7 @@ class UserResource(Resource):
                 return {"message": "User not found."}, 404
         except Exception as e:
             return {"error": str(e)}, 500
-    
+
     @jwt_required()
     def delete(self):
         try:
@@ -37,18 +37,16 @@ class UserResource(Resource):
             user = User.query.filter_by(email=current_user).first()
 
             if user:
-                # check if the current user is an admin or the user themself
-                if current_user.role != 'admin' and current_user.id != user.id:
-                    return {'error': 'access denied. Only the user themself or an admin can delete the user.'}, 403
-                
                 db.session.delete(user)
                 db.session.commit()
-                return {'message': 'User deleted successfully.'}, 200
+
+                return{'message': "User deleted successfully."}, 200
             else:
                 return {'message': 'User not found'}, 404
         except Exception as e:
             return {'error': str(e)}, 500
-        
+
+
 class UserUpdateResource(Resource):
     @jwt_required()
     def patch(self):
