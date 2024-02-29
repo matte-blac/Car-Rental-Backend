@@ -23,7 +23,7 @@ The application is a backend service with a RESTful API. It does not have a user
 - **Admin Panel**: Admin users can manage available cars and approve or cancel hire requests.
 
 ## How to Run the Project
-1. Clone the repository: `git clone git@github.com:matte-blac/Car-Rental-Frontend.git`
+1. Clone the repository: `git clone git@github.com:matte-blac/Car-Rental-Backend.git`
 2. Install the dependencies: `pip install -r requirements.txt`
 3. Set up the database: `flask db init`
 4. Run the server: `python app.py or flask run`
