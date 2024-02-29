@@ -7,6 +7,7 @@ from flask_restful import Api
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
 from admin import AdminAvailableCarResource
@@ -28,6 +29,27 @@ from hire import (
 
 app = Flask(__name__)
 CORS(app)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'blooddonationapplication69@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'cbem mgim nxvd mrnw'
+app.config['MAIL_DEFAULT_SENDER'] = 'blooddonationapplication69@gmail.com'
+
+# Initialize Flask-Mail
+mail = Mail(app)
+
+# Define the send_email function
+def send_email(subject, recipients, body):
+    try:
+        msg = Message(subject, recipients=recipients)
+        msg.body = body
+        mail.send(msg)
+        return True
+    except Exception as e:
+        app.logger.error(f"Error sending email: {e}")
+        return False
 
 # Replace these values with your actual Safaricom Daraja API credentials
 CONSUMER_KEY = "V9fxIEMJoQZoLMGJTR7KNSFUlEACwkc3IGlwAcuFKlXtntG0"
@@ -237,7 +259,20 @@ def generate_token():
         return response.json().get('access_token')
     except requests.exceptions.RequestException as e:
         raise RuntimeError(f"Failed to generate token: {e}") from e
+    
+@app.route('/send_email', methods=['POST'])
+def send_email_route():
+    data = request.json
+    subject = data.get('subject')
+    recipients = data.get('recipients')
+    body = data.get('body')
 
+    if not subject or not recipients or not body:
+        return jsonify({"error": "Subject, recipients, and body are required"}), 400
 
+    if send_email(subject, recipients, body):  
+        return jsonify({"message": "Email sent successfully"})
+    else:
+        return jsonify({"error": "Failed to send email"}), 500
 if __name__ == '__main__':
     app.run(debug=True)
