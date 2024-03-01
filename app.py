@@ -1,28 +1,77 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
+import requests
+import base64
+import datetime
+import json
 from flask_restful import Api
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 from models import db, AvailableCar, HiredCar, User, Category
 from login import LoginResource, UserRegistrationResource
-from admin import AvailableCarResource,AdminAvailableCarResource, UserRoleResource
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
-from hire import AdminActionResource, HireStatusResource, HireResource
-from hire import AdminActionResource, HireResource, HireStatusResource
+from admin import AdminAvailableCarResource
+from users import UserResource, UserUpdateResource
+from availablecars import AvailableCarResource
+from flask_jwt_extended import (
+    JWTManager,
+    jwt_required,
+    create_access_token,
+    get_jwt_identity,
+)
+from hire import (
+    AdminActionResource,
+    HireResource,
+    HireStatusResource,
+    AdminAllHiresResource,
+    UserHiresResource,
+)
 
-# Create Flask application instance
 app = Flask(__name__)
-
 CORS(app)
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'blooddonationapplication69@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'cbem mgim nxvd mrnw'
+app.config['MAIL_DEFAULT_SENDER'] = 'blooddonationapplication69@gmail.com'
+
+# Initialize Flask-Mail
+mail = Mail(app)
+
+# Define the send_email function
+def send_email(subject, recipients, body):
+    try:
+        msg = Message(subject, recipients=recipients)
+        msg.body = body
+        mail.send(msg)
+        return True
+    except Exception as e:
+        app.logger.error(f"Error sending email: {e}")
+        return False
+
+# Replace these values with your actual Safaricom Daraja API credentials
+CONSUMER_KEY = "V9fxIEMJoQZoLMGJTR7KNSFUlEACwkc3IGlwAcuFKlXtntG0"
+CONSUMER_SECRET = "nFYKGwWdAiGB9l31HGGIi5LUibx0oG39jSzZSnDi7JwYUHdrwfjK11OT1zgBZnr1"
+LIPA_NA_MPESA_PASSKEY = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
+SHORTCODE = "174379"
+LIPA_NA_MPESA_ONLINE_ENDPOINT = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
+
+# Token cache
+token_cache = {
+    "token": None,
+    "expiry_time": None
+}
+
 # Configure SQLAlchemy to use SQLite database located at 'app.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 jwt = JWTManager(app)
 # Set the secret key for JWT token
-app.config['JWT_SECRET_KEY'] = 'super-secret'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600000  # Token expiration time (1 hour)
+app.config["JWT_SECRET_KEY"] = "super-secret"
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 3600000  # Token expiration time (1 hour)
 
 # Initialize SQLAlchemy with the Flask app
 migrate = Migrate(app, db)
@@ -37,170 +86,193 @@ api = Api(app)
 
 
 # Endpoint for user login
-api.add_resource(LoginResource, '/login')
+api.add_resource(LoginResource, "/login")
 
 # Endpoint for user registration
 # Add User Registration resource to the Flask-RESTful API with the endpoint '/register'
-api.add_resource(UserRegistrationResource, '/register')
+api.add_resource(UserRegistrationResource, "/register")
+
+api.add_resource(UserResource, "/current_user")
+api.add_resource(UserUpdateResource, "/update_user")
+
 
 # Endpoints for retrieving and managing available cars
-api.add_resource(AvailableCarResource, '/availablecars', '/availablecars/<int:availablecar_id>', '/public/availablecars')
+api.add_resource(
+    AvailableCarResource,
+    "/availablecars",
+    "/availablecars/<int:availablecar_id>",
+    "/public/availablecars",
+)
 # Endpoint for admin actions on available cars
-api.add_resource(AdminAvailableCarResource, '/availablecars/<int:availablecar_id>')
+api.add_resource(AdminAvailableCarResource, "/availablecars/<int:availablecar_id>")
 
 # Endpoint for hiring a car
-api.add_resource(HireResource, '/hire')
+api.add_resource(HireResource, "/hire")
 # Endpoint for checking hire status
-api.add_resource(HireStatusResource, '/hire_status/<int:user_id>')
+api.add_resource(HireStatusResource, "/hire_status/<int:user_id>")
 # Endpoint for admin actions
-api.add_resource(AdminActionResource, '/admin/action')
+api.add_resource(AdminActionResource, "/admin/action")
 
-#get all available cars
-@app.route('/availablecars')
-def get_availablecars():
-    availablecars = AvailableCar.query.all()
-    cars_list = []
-    for car in availablecars:
-        car_dict = {
-            'id': car.id,
-            'brand': car.brand,
-            'price': car.price,
-            'car_name': car.car_name,
-            "quantity": car.quantity,
-            'image_url': car.image_url,
-            'number_plate': car.number_plate
-        }
-        cars_list.append(car_dict)
-    return jsonify (cars_list)
 
-#get available cars by id
-@app.route('/availablecars/<int:availablecars_id>', methods=['GET'])
-def get_availablecars_by_id(availablecars_id):
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        return jsonify({
-            'id': car.id,
-            'brand': car.brand
-        }), 200
-    else:
-        return jsonify ({'error': 'Car not found'}, 400)
+# Add routes to the API
+api.add_resource(AdminAllHiresResource, "/admin/hires")
+api.add_resource(UserHiresResource, "/user/<int:user_id>/hires")
 
-#update available cars
-@app.route('/availablecars/<int:availablecars_id>', methods=['PUT'])
-def update_availablecar(availablecars_id):
-    data = request.json
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        car.brand = data.get('brand', car.brand)
-        car.price = data.get('price', car.price)
-        car.car_name = data.get('car_name', car.car_name)
-        car.quantity = data.get('quantity', car.quantity)
-        car.image_url = data.get('image_url', car.image_url)
-        car.number_plate = data.get('number_plate', car.number_plate)
-        db.session.commit()
-        return jsonify({'message': 'Available car updated successfully'})
-    else:
-        return jsonify({"message": 'Car not found. Failed to update.'})
 
-#search for car
-@app.route('/cars/<search_term>')
+# search for car
+@app.route("/cars/<search_term>")
 def search_cars(search_term):
     # Perform search query using SQLAlchemy
     search_results = AvailableCar.query.filter(
-        (AvailableCar.brand.ilike(f'%{search_term}%')) |
-        (AvailableCar.car_name.ilike(f'%{search_term}%'))
+        (AvailableCar.brand.ilike(f"%{search_term}%"))
+        | (AvailableCar.car_name.ilike(f"%{search_term}%"))
     ).all()
     # Serialize search results and return as JSON
     return jsonify([car.serialize() for car in search_results])
 
-    
-#delete available car by id
-@app.route('/availablecars/<int:availablecars_id>', methods=['DELETE'])
-def delete_availablecar(availablecars_id):
-    car = AvailableCar.query.get(availablecars_id)
-    if car:
-        db.session.delete(car)
-        db.session.commit()
-        return jsonify({'message': 'Available car has been deleted'})
-    else:
-        return jsonify ({'message': 'Error deleting car'})
 
-# add new available car
-@app.route('/availablecars', methods=['POST'])
-def add_availablecar():
-    data = request.json
-    new_car = AvailableCar(
-    brand=data['brand'],
-    price=data['price'],
-    car_name=data['car_name'],
-    quantity=data['quantity'],
-    image_url=data['image_url'],
-    number_plate=data['number_plate']
-    )
-    db.session.add(new_car)
-    db.session.commit()
-    return jsonify ({'message': 'New car addded succssfully'})
-
-#get all categories
-@app.route('/categories')
+# get all categories
+@app.route("/categories")
 def get_categories():
     categories = Category.query.all()
     categories_list = []
     for category in categories:
-        category_dict = {
-            'id': category.id,
-            'category_name': category.category_name
-        }
+        category_dict = {"id": category.id, "category_name": category.category_name}
         categories_list.append(category_dict)
-    return jsonify (categories_list)
+    return jsonify(categories_list)
 
-#get categories by id
-@app.route('/categories/<int:categories_id>', methods=['GET'])
+
+# get categories by id
+@app.route("/categories/<int:categories_id>", methods=["GET"])
 def get_categories_by_id(categories_id):
     category = Category.query.get(categories_id)
     if category:
-        return jsonify({
-            'id': category.id,
-            'category_name': category.category_name
-        }), 200
+        return (
+            jsonify({"id": category.id, "category_name": category.category_name}),
+            200,
+        )
     else:
-        return jsonify ({'error': 'Category not found'}, 400)
+        return jsonify({"error": "Category not found"}, 400)
 
-#update categories
-@app.route('/categories/<int:categories_id>', methods=['PUT'])
+
+# update categories
+@app.route("/categories/<int:categories_id>", methods=["PUT"])
 def update_category(categories_id):
     data = request.json
     category = Category.query.get(categories_id)
     if category:
-        category.category_name = data.get('category_name', category.category_name)
+        category.category_name = data.get("category_name", category.category_name)
         db.session.commit()
-        return jsonify({'message': 'Category updated successfully'})
+        return jsonify({"message": "Category updated successfully"})
     else:
-        return jsonify({"message": 'Failed to update'})
+        return jsonify({"message": "Failed to update"})
 
-#delete category by id
-@app.route('/categories/<int:categories_id>', methods=['DELETE'])
+
+# delete category by id
+@app.route("/categories/<int:categories_id>", methods=["DELETE"])
 def delete_category(categories_id):
     category = Category.query.get(categories_id)
     if category:
         db.session.delete(category)
         db.session.commit()
-        return jsonify({'message': 'Category has been deleted'})
+        return jsonify({"message": "Category has been deleted"})
     else:
-        return jsonify ({'message': 'Error deleting category'})
+        return jsonify({"message": "Error deleting category"})
+
 
 # add new category
-@app.route('/categories', methods=['POST'])
+@app.route("/categories", methods=["POST"])
 def add_category():
     data = request.json
-    new_category = Category(
-    category_name=data['category_name']
-    )
+    new_category = Category(category_name=data["category_name"])
     db.session.add(new_category)
     db.session.commit()
-    return jsonify ({'message': 'Category addded succssfully'})
+    return jsonify({"message": "Category addded succssfully"})
 
 
-# Start the Flask application if this script is executed directly
+# Payment logic
+@app.route('/callback_url', methods=['POST'])
+def callback_url():
+    data = request.json
+
+    # Process the callback data
+    transaction_status = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
+    print(data)
+    if transaction_status == 0:
+        print("Payment successful")
+    else:
+        # Payment failed
+        # Handle the failure scenario
+        print("Payment failed")
+
+    return jsonify({"ResultCode": 0, "ResultDesc": "Success"})  
+
+@app.route('/lipa_na_mpesa', methods=['POST'])
+def lipa_na_mpesa():
+    try:
+        token = generate_token()
+        if token is None:
+            return jsonify({"error": "Failed to generate token"}), 500
+        phone_number = request.json.get('phone_number')
+        amount = request.json.get('amount')
+        
+        if not phone_number or not amount:
+            return jsonify({"error": "Phone number and amount are required"}), 400
+
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        password = base64.b64encode((SHORTCODE + LIPA_NA_MPESA_PASSKEY + timestamp).encode()).decode('utf-8')
+
+        payload = {
+            "BusinessShortCode": SHORTCODE,
+            "Password": password,
+            "Timestamp": timestamp,
+            "TransactionType": "CustomerPayBillOnline",
+            "Amount": amount,
+            "PartyA": phone_number,
+            "PartyB": SHORTCODE,
+            "PhoneNumber": phone_number,
+            "CallBackURL": "https://8ead-41-80-111-14.ngrok-free.app/callback_url",
+            "AccountReference": "Safari Wheels Kenya",
+            "TransactionDesc": "Payment for testing"
+        }
+
+        headers = {
+            "Authorization": "Bearer " + generate_token(),
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(LIPA_NA_MPESA_ONLINE_ENDPOINT, json=payload, headers=headers)
+
+        return jsonify(response.json())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+def generate_token():
+    token_endpoint = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+    credentials = base64.b64encode((CONSUMER_KEY + ':' + CONSUMER_SECRET).encode()).decode('utf-8')
+    headers = {
+        'Authorization': 'Basic ' + credentials
+    }
+
+    try:
+        response = requests.get(token_endpoint, headers=headers)
+        response.raise_for_status()  
+        return response.json().get('access_token')
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Failed to generate token: {e}") from e
+    
+@app.route('/send_email', methods=['POST'])
+def send_email_route():
+    data = request.json
+    subject = data.get('subject')
+    recipients = data.get('recipients')
+    body = data.get('body')
+
+    if not subject or not recipients or not body:
+        return jsonify({"error": "Subject, recipients, and body are required"}), 400
+
+    if send_email(subject, recipients, body):  
+        return jsonify({"message": "Email sent successfully"})
+    else:
+        return jsonify({"error": "Failed to send email"}), 500
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)
+    app.run(debug=True)
